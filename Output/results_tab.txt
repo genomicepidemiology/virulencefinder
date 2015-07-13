@@ -1,0 +1,3 @@
+Virulence factor	Identity	Query/HSP	Contig	Position in contig	Protein function	Accession no.
+astA	100.00	117/117	astA:1:AF161000	1..117	 EAST-1 heat-stable toxin 
+	AF161000
