@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/VirulenceFinder.t
+lib/VirulenceFinder.pm
