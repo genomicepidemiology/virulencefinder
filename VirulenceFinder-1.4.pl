@@ -10,6 +10,7 @@ use File::Temp qw/ tempfile tempdir /;
 use Bio::SeqIO;
 use Bio::Seq;
 use Bio::SearchIO;
+use Try::Tiny::Retry;
 
 use constant PROGRAM_NAME            => 'VirulenceFinder_1.4.pl';
 use constant PROGRAM_NAME_LONG       => 'Finds antimicrobial resitance genes for a sequence or genome';
@@ -99,12 +100,19 @@ foreach my $element(@Antimicrobial){
   # print "$element\n";
   $antibiocount ++;
   my $CurrentAnti = $element;
+  
+  
   # Run BLAST and find best matching Alleles
-  my $Seqs_ABres   = read_seqs(-file => $ABRES_DB.'/'.$element.'.fsa', format => 'fasta');  
-  my $Seqs_input  = $InFile ne "" ? read_seqs(-file => $InFile, -format => $IFormat) : 
+  my ($Seqs_ABres, $Seqs_input, @Blast_lines);
+  
+  retry{
+      $Seqs_ABres   = read_seqs(-file => $ABRES_DB.'/'.$element.'.fsa', format => 'fasta');  
+      $Seqs_input  = $InFile ne "" ? read_seqs(-file => $InFile, -format => $IFormat) : 
                                   read_seqs(-fh => \*STDIN,   -format => $IFormat);
-
-  my @Blast_lines = get_blast_run(-d => $Seqs_input, -i => $Seqs_ABres, %ARGV);
+   
+      @Blast_lines = get_blast_run(-d => $Seqs_input, -i => $Seqs_ABres, %ARGV)
+   }
+   catch{ die $_ };
  
   # Declaring variables for each BLAST
   #Declaring variables - array and hash
@@ -1036,6 +1044,7 @@ sub commandline_parsing {
         }
         elsif ($ARGV[0] =~ m/^-o$/) {
             $dir = $ARGV[1];
+            mkdir $dir;
             shift @ARGV;
             shift @ARGV;
         }
@@ -1077,13 +1086,11 @@ sub get_blast_run {
   output_sequence(-fh => $fh, seqs => delete $args{-d}, -format => 'fasta');
   die "Error! Could not build blast database" if (system("$FORMATDB -p F -i $file")); 
   my $query_file = $file.".blastpipe";
-  #`mknod $query_file p`;
-  if ( !fork() ) {
-    open QUERY, ">> $query_file" || die("Error! Could not perform blast run");
-    output_sequence(-fh => \*QUERY, seqs => $args{-i}, -format => 'fasta');
-    close QUERY;
-    exit(0);
-  }
+
+  open QUERY, ">> $query_file" || die("Error! Could not perform blast run");
+  output_sequence(-fh => \*QUERY, seqs => $args{-i}, -format => 'fasta');
+  close QUERY;
+
   delete $args{-i};
   my $cmd = join(" ", %args);
   my ($fh2, $file2) = tempfile( DIR => '/tmp', UNLINK => 1); 
