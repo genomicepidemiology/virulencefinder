@@ -64,12 +64,10 @@ my %argfProfiles=();
 #$argfProfiles{"virulence_fmaa"} ="Virulence - TEST FMAA";
 $argfProfiles{"virulence_ENT"} ="Virulence - Enterococcus";
 $argfProfiles{"virulence_ecoli"} ="Virulence - E. coli";
-$argfProfiles{"s.aureus_adherence"} ="S. aureus - Adherence";
-$argfProfiles{"s.aureus_toxin"} ="S. aureus - Toxin";
+$argfProfiles{"s.aureus_enterotoxin"} ="S. aureus - Enterotoxin";
 $argfProfiles{"s.aureus_exoenzyme"} ="S. aureus - Exoenzyme";
 $argfProfiles{"s.aureus_hostimm"} ="S. aureus - Host Immune evasion";
-$argfProfiles{"s.aureus_secretion"} ="S. aureus - Secretion system";
-$argfProfiles{"s.aureus"} ="S. aureus";
+#$argfProfiles{"s.aureus"} ="S. aureus";
 # -----------------------
 #Making phenotype list
 my %Notes_hash = &phenolist($Notes1);
@@ -1016,7 +1014,7 @@ sub commandline_parsing {
     while (scalar @ARGV) {
         if ($ARGV[0] =~ m/^-d$/) {
             $ABRES_DB = $ARGV[1];
-			$Notes1 = "$ABRES_DB/notes.txt";
+            $Notes1 = "$ABRES_DB/notes.txt";
             shift @ARGV;
             shift @ARGV;
         }

@@ -36,7 +36,6 @@ mcmA:  Microcin M part of colicin H:
 nfaE:  Diffuse adherence fibrillar adhesin gene:
 perA:  EPEC adherence factor:
 pet:  Autotransporter enterotoxin:
-prfB:  P-related fimbriae regulatory gene:
 senB:  Plasmid-encoded enterotoxin:
 sfaS:  S-fimbriae minor subunit:
 sta1:  Heat-stabile enterotoxin ST-Ia:

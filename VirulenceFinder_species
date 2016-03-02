@@ -3,4 +3,4 @@ VirulenceFinder species
 Option  Species
 virulence_ecoli E. coli
 virulence_ENT   Enterococcus
-s.aureus_adherence,s.aureus_toxin,s.aureus_exoenzyme,s.aureus_hostimm,s.aureus_secretion    S. aureus
+s.aureus_enterotoxin,s.aureus_exoenzyme,s.aureus_hostimm    S. aureus
