@@ -22,7 +22,7 @@ my $BLASTALL;
 my $FORMATDB;
 my $ABRES_DB;
 my $Notes1;
-my ($Help, $AB_indput, $threshold,$InFile, $dir);
+my ($Help, $AB_input, $threshold,$InFile, $dir);
 my $IFormat = "fasta";
 my $OFormat = "ST";
 my %ARGV    = ('-p' => 'blastn', '-a' => '5' , '-F' => 'F');
@@ -30,7 +30,7 @@ my %ARGV    = ('-p' => 'blastn', '-a' => '5' , '-F' => 'F');
 #Getting global variables from the command line
 &commandline_parsing();
 
-if (defined $Help || not defined $AB_indput || not defined $InFile || not defined $threshold) {
+if (defined $Help || not defined $AB_input || not defined $InFile || not defined $threshold) {
    print_help();
    exit;
 }
@@ -93,7 +93,7 @@ my $hits_in_seq = ""; #Added for alignment print
 
 # Finding genes for each chosen antimicrobial family
 my $antibiocount = 0;
-my @Antimicrobial = split(/,/,$AB_indput);
+my @Antimicrobial = split(/,/,$AB_input);
 foreach my $element(@Antimicrobial){
   # print "$element\n";
   $antibiocount ++;
@@ -1031,7 +1031,7 @@ sub commandline_parsing {
             shift @ARGV;
         }
         elsif ($ARGV[0] =~ m/^-s$/) {
-            $AB_indput = $ARGV[1];
+            $AB_input = $ARGV[1];
             shift @ARGV;
             shift @ARGV;
         }
@@ -1265,9 +1265,9 @@ OPTIONS
                     The folder you want to have your output files stored.
                     If not specified the program will create a folder named
                     'Output' in which the result files will be stored
-    -s SPECIES
-                    The species. The options can be found in the file
-                    'VirulenceFinder_species'
+    -s SCHEMES
+                    The schemes. You can find an overview of the schemes in the
+                    config file. Separate multiple database prefixes with comma
     -k THRESHOLD
                     The threshold for % identity for example '95.00' for 95 %
 
