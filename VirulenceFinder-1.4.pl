@@ -45,8 +45,7 @@ if (not defined $ABRES_DB) {
   $Notes1 = "database/notes.txt";
 }
 if (not defined $dir) {
-  mkdir "output";
-  $dir = "output";
+  $dir = ".";
 }
 
 
