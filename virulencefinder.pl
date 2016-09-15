@@ -12,7 +12,7 @@ use Bio::Seq;
 use Bio::SearchIO;
 use Try::Tiny::Retry;
 
-use constant PROGRAM_NAME            => 'VirulenceFinder_1.4.pl';
+use constant PROGRAM_NAME            => 'virulencefinder.pl';
 use constant PROGRAM_NAME_LONG       => 'Finds antimicrobial resitance genes for a sequence or genome';
 use constant VERSION                 => '1.4';
 
@@ -82,6 +82,7 @@ my %FINAL_RESULTS; # will contain the results for txt printing
 ### Variables for text-printing ###
 my $txtresults= "VirulenceFinder result file\n\n"; #Added to txt print
 my $tabr .= "Virulence factor\tIdentity\tQuery/HSP\tContig\tPosition in contig\tProtein function\tAccession no.\n"; #added to print tab-separated txt file
+my $tableresult = "";
 my  $contigtable ="\nContig Table\n"; #added to txt print
 $contigtable .= "-----------\n";
 my $Virulencetable ="\nVirulence Factor\tProtein Function\n";
@@ -890,23 +891,32 @@ foreach my $element(@Antimicrobial){
  
   } # End foreach my $gene (keys %Profile){
 
-  my $length = scalar@control;
-  push(@RESULTS_AND_SETTINGS_ARRAY, $length);
-  push(@RESULTS_AND_SETTINGS_ARRAY, $argfProfiles{$element});
-  push(@RESULTS_AND_SETTINGS_ARRAY, $InFile);
-  push(@RESULTS_AND_SETTINGS_ARRAY, $threshold);
-  
-   ## Making a hash with results for txt printing WORKS
-  foreach my $key (sort keys %GENE_RESULTS_HASH) {
-    my $array = $GENE_RESULTS_HASH{$key};   
-    $FINAL_RESULTS{$key}= [@$array[9], @$array[1], @$array[2], @$array[3],  @$array[4], @$array[5], @$array[8], $CurrentAnti];
-    my @tmp = split(/\<br\>/, @$array[7]);
-    my $function = $tmp[0] ;
-    $Virulencetable .= @$array[9]."\t\t".$function."\n";
-    $Virulencetable .= "-----------\n";
-    $tabr .= @$array[9]."\t".@$array[1]."\t".@$array[3]."/".@$array[2]."\t".@$array[4]."\t".@$array[5]."\t".$function."\t".@$array[8]."\n";
+  # Making the header of for the tab seperated result file
+  $tableresult .= $argfProfiles{$CurrentAnti};  
+  if (!%GENE_RESULTS_HASH) {
+    $tableresult .= "\nNo virulence factors found.\n"
+  }
+  else {
+    $tableresult .= "\nVirulence factor\tIdentity\tQuery/HSP\tContig\tPosition in contig\tProtein function\tAccession no.\n"; #added to print tab-separated txt file
     
-  } 
+    ## Making a hash with results for txt printing WORKS
+    foreach my $key (sort keys %GENE_RESULTS_HASH) {
+      my $array = $GENE_RESULTS_HASH{$key};   
+      $FINAL_RESULTS{$key}= [@$array[9], @$array[1], @$array[2], @$array[3],  @$array[4], @$array[5], @$array[8], $CurrentAnti];
+      my @tmp = split(/\<br\>/, @$array[7]);
+      my $function = $tmp[0] ;
+      chomp $function;
+      $Virulencetable .= @$array[9]."\t\t".$function."\n";
+      $Virulencetable .= "-----------\n";
+      
+      $tabr .= @$array[9]."\t".@$array[1]."\t".@$array[2]."/".@$array[3]."\t".@$array[4]."\t".@$array[5]."\t".$function."\t".@$array[8]."\n";
+
+      $tableresult .= @$array[9]."\t".@$array[1]."\t".@$array[2]."/".@$array[3]."\t".@$array[4]."\t".@$array[5]."\t".$function."\t".@$array[8]."\n";
+    } 
+  }
+  # Ekstra newline indicating that the result for the current anti has ended and a new can begin in the tab result
+  $tableresult .= "\n";
+  
 } # End foreach my $element(@Antimicrobial){
 
 my $contigcount = 0; ## To give the contig numbers and put the real contig names in a table
@@ -945,6 +955,10 @@ foreach my $key (sort keys %GENE_RESULTS_HASH2) {
 	  
   my $array = $GENE_RESULTS_HASH2{$key}; 
   my $outStr = @$array[7];
+  my $hspLen = @$array[3];
+  my $qStart = @$array[6];
+  my $qEnd = $qStart + $hspLen - 1;
+  
     #my $matchAll = lc(@$array[5]);
   if (@$array[0] eq "perfect" ){
 	 $outStr .= ": PERFECT MATCH, "; 
@@ -955,10 +969,10 @@ foreach my $key (sort keys %GENE_RESULTS_HASH2) {
   elsif (@$array[0] eq "warning2"){
     $outStr = $outStr.": WARNING2, "; 
   }  
-  $alignment .= $outStr."ID: ".@$array[1]."%, Query/HSP Length: ".@$array[3]."/".@$array[2]. ", Contig name: ".@$array[4].", Position: ".@$array[5]."\n\n";
-  $hits_in_seq .= ">".$outStr."ID: ".@$array[1]."%, Query/HSP Length: ".@$array[3]."/".@$array[2]. ", Contig name: ".@$array[4].", Position: ".@$array[5]."\n"; #måske forkert text
+  $alignment .= $outStr."ID: ".@$array[1]."%, Query/HSP Length: ".@$array[2]."/".@$array[3]. ", Contig name: ".@$array[4].", Position: ".@$array[5]."\n\n";
+  $hits_in_seq .= ">".$outStr."ID: ".@$array[1]."%, Query/HSP Length: ".@$array[2]."/".@$array[3]. ", Positions in reference: ".$qStart."..".$qEnd.", Contig name: ".@$array[4]."\n"; #måske forkert text
   $resalign .= ">".@$array[7]."\n";
-
+  
 	 #now print the alleles
   my $queryArray = $GENE_ALIGN_QUERY_HASH{$key};
   my $homoArray = $GENE_ALIGN_HOMO_HASH{$key};
@@ -987,7 +1001,13 @@ print TXTRESULTS $alignment;
 close (TXTRESULTS);
 #print $txtresults; #printing to screen	
 
-open (TABR, '>'."$dir/results_tab.txt") || die("Error! Could not write to Hit_in_genome_seq.fsa");
+# Writing table result
+open (TABLER, '>'."$dir/results_table.txt") || die("Error! Could not write to results_table.fsa");
+print TABLER $tableresult;
+close (TABLER);
+
+# Writing tab resuts
+open (TABR, '>'."$dir/results_tab.txt") || die("Error! Could not write to results_tab.fsa");
 print TABR $tabr;
 close (TABR);
 
