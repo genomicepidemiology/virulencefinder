@@ -16,7 +16,7 @@ isolates of bacteria - at the moment only E. coli, Enterococcus and S. aureus ar
 
 ## Content of the repository
 1. virulencefinder.pl  - the program
-2. INSTALL_DB          - shell script for downloading the MLST database
+2. INSTALL_DB          - shell script for downloading the database
 3. UPDATE_DB           - shell script for updating the database to the newest version
 4. VALIDATE_DB         - python script for verifying the database contains all
                        required files 
