@@ -451,7 +451,6 @@ if args.extented_output:
          result_file.write(db_description[db_name] + "\n")
          db_rows = []
          for gene_id, gene_info in sorted(db_hits.items(), key=lambda  x: (x[1]['virulence_gene'], x[1]['accession'])):
-            print(gene_id)
             vir_gene = gene_info["virulence_gene"]
             identity = str(gene_info["identity"])
             coverage = str(gene_info["coverage"])
