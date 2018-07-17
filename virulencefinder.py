@@ -127,7 +127,7 @@ parser = ArgumentParser()
 parser.add_argument("-i", "--infile", dest="infile", help="FASTA or FASTQ input files.", nargs = "+", default='')
 parser.add_argument("-o", "--outputPath", dest="outdir",help="Path to blast output", default='')
 parser.add_argument("-mp", "--methodPath", dest="method_path",help="Path to method to use (kma or blast)", default='blastn')
-parser.add_argument("-p", "--databasePath", dest="db_path",help="Path to the databases", default='')
+parser.add_argument("-p", "--databasePath", dest="db_path",help="Path to the databases", default='/database')
 parser.add_argument("-d", "--databases", dest="databases",help="Databases chosen to search in - if non is specified all is used", default=None)
 parser.add_argument("-l", "--mincov", dest="min_cov",help="Minimum coverage", default=0.60)
 parser.add_argument("-t", "--threshold", dest="threshold",help="Blast threshold for identity", default=0.90)
@@ -150,6 +150,7 @@ if args.quiet:
 # Defining varibales
 min_cov = float(args.min_cov)
 threshold = float(args.threshold)
+method_path = args.method_path
 
 # Check if valid database is provided
 if args.db_path is None:
@@ -187,13 +188,6 @@ if args.tmp_dir:
       tmp_dir = os.path.abspath(args.tmp_dir)
 else:
    tmp_dir = outdir
-
-# Check if valid path to BLAST is provided
-if not os.path.exists(args.method_path):
-   sys.exit("Input Error: Method path could not be found!\n")
-else:
-   method_path = args.method_path
-
 
 db_description = {}
 # Check if databases and config file are correct/correponds
@@ -310,7 +304,7 @@ for line in notes_file:
    func_notes[gene] = func
 
 hits = []
-
+table_file_lst = []
 for db in results:
    contig_res = {}
    if db == 'excluded':
@@ -377,7 +371,7 @@ for db in results:
       for hit in hits:
          header = hit["sbjct_header"]
 
-         tmp = header.split(":")
+         tmp = header.split("_")
          gene = tmp[0]
          note = tmp[1]
          acc = tmp[2]
@@ -420,7 +414,6 @@ data[service]["user_input"] = userinput
 data[service]["run_info"] = run_info
 data[service]["results"] = json_results
 
-pprint.pprint(data)
 
 # Save json output
 result_file = "{}/data.json".format(outdir) 
