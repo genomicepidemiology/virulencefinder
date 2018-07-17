@@ -1,151 +1,104 @@
-===================
 VirulenceFinder
 ===================
 
-This project documents VirulenceFinder service
+This project documents the VirulenceFinder service
 
 
 Documentation
 =============
 
-## What is it?
-
-The VirulenceFinder service contains one perl script *virulencefinder.pl* which is the script of the lates
+The VirulenceFinder service contains one python script virulencefinder.py which is the script of the latest
 version of the VirulenceFinder service. VirulenceFinder identifies viruelnce genes in total or partial sequenced
-isolates of bacteria - at the moment only E. coli, Enterococcus and S. aureus are available.
+isolates of bacteria - at the moment only E. coli, Enterococcus, S. aureus and Listeria are available.
+
 
 ## Content of the repository
-1. virulencefinder.pl  - the program
-2. INSTALL_DB          - shell script for downloading the database
-3. UPDATE_DB           - shell script for updating the database to the newest version
-4. VALIDATE_DB         - python script for verifying the database contains all
-                       required files 
-5. brew.sh             - shell script for installing dependencies
-6. makefile            - make script for installing dependencies
-7. test.fsa            - test fasta file
-  
+1. virulencefinder.py      - the program
+2. test     	- test folder
+3. README.md
+4. Dockerfile   - dockerfile for building the virulencefinder docker container
+
+
 ## Installation
 
-Setting up virulencefinder
+Setting up VirulenceFinder program
 ```bash
-# Go to wanted location for resfinder
+# Go to wanted location for virulencefinder
 cd /path/to/some/dir
-# Clone and enter the mlst directory
+# Clone and enter the virulencefinder directory
 git clone https://bitbucket.org/genomicepidemiology/virulencefinder.git
-cd plasmidfinder
+cd virulencefinder
 ```
 
-Installing up the virulencefinder database
+Build Docker container
 ```bash
-cd /path/to/virulencefinder
-./INSTALL_DB database
-
-# Check all DB scripts works, and validate the database is correct
-./UPDATE_DB database
-./VALIDATE_DB database
+# Build container
+docker build -t virulencefinder .
+# Run test
+docker run --rm -it \
+       --entrypoint=/test/test.sh virulencefinder
 ```
 
-Installing dependencies:
-
-Perlbrew is used to manage isolated perl environments. To install it run:
-```bash
-bash brew.sh
-```
-
-This will installed Perl 5.23 in the Home folder, along with CPAN minus as package manager.
-Blast will also be installed when running brew.sh if BlastAll and FormatDB are not already installed and place in the user's path.
-After running brew.sh and installing Blast add this command to the end of your ~/bash_profile to add BlastAll and FormatDB to the user's path
+#Download and install VirulenceFinder database
 
 ```bash
-export PATH=$PATH:blast-2.2.26/bin
+# Go to the directory where you want to store the virulencefinder database
+cd /path/to/some/dir
+# Clone database from git repository (develop branch)
+git clone https://bitbucket.org/genomicepidemiology/virulencefinder_db.git
+cd virulencefinder_db
+VIRULENCE_DB=$(pwd)
+# Install VirulenceFinder database with executable kma_index program
+python3 INSTALL.py kma_index
 ```
 
-If you want to download the two external tools from the Blast package, BlastAll and FormatDB, yourself go to
-```url
-ftp://ftp.ncbi.nlm.nih.gov/blast/executables/release/LATEST
-```
-
-and download the version for your OS with the format:
-```url
-blast-version-architecture-OS.tar.gz
-```
-
-after unzipping the file, add this command to the end of your ~/bash_profile.
-```bash
-export PATH=$PATH:/path/to/blast-folder/bin
-```
-
-where path/to/blast-folder is the folder you unzipped.
-
-At last VirulenceFinder has several Perl dependencies. To install them (this requires CPAN minus as package manager):
-```bash
-make install
-```
-
-The scripts are self contained. You just have to copy them to where they should
-be used. Only the *database* folder needs to be updated mannually.
-
-Remember to add the program to your system path if you want to be able to invoke the program without calling the full path.
-If you don't do that you have to write the full path to the program when using it.
+If kma_index has no bin install please install kma_index from the kma repository:
+https://bitbucket.org/genomicepidemiology/kma
 
 ## Usage
 
 The program can be invoked with the -h option to get help and more information of the service.
+Run Docker container:
+
 
 ```bash
-Usage: perl virulencefinder.pl [options]
-
-Options:
-
-    -h HELP
-                    Prints a message with options and information to the screen
-    -d DATABASE
-                    The path to where you have located the database folder
-    -b BLAST
-                    The path to the location of blast-2.2.26 if it is not added
-                    to the users path (see the install guide in 'README.md') 
-    -i INFILE
-                    Your input file which needs to be preassembled partial
-                    or complete genomes in fasta format
-    -o OUTFOLDER
-                    The folder you want to have your output files stored.
-                    If not specified the program will create a folder named
-                    'Output' in which the result files will be stored
-    -s SPECIES
-                    The species. The options can be found in the file
-                    'config' placed in the database folder if you use our
-                    databases
-    -k THRESHOLD
-                    The threshold for % identity for example '95.00' for 95 %
+# Run virulencefinder container
+docker run --rm -it \
+       -v $VIRULENCE_DB:/database \
+       -v $(pwd):/workdir \
+       virulencefinder -i [INPUTFILE] -o [OUTDIR] [-d] [-p] [-mp] [-l] [-t] [-tmp] [-x]
 ```
 
-Example of use with the *database* folder located in the current directory and Blast added to the user's path
-```perl
-    perl virulencefinder.pl -i test.fsa -o OUTFOLDER -s virulence_ecoli -k 95.00
-```
-#### Example of use with the *database* and *blast-2.2.26* folders loacted in other directories
-```perl
-    perl virulencefinder.pl -d path/to/database -b path/to/blast-2.2.26 -i \
-    test.fsa -o OUTFOLDER -s virulence_ecoli -k 95.00
-```    
+When running the docker file you must mount 2 directories: 
+ 1. virulencefinder_db (VirulenceFinder database) downloaded from bitbucket
+ 2. An output/input folder from where the input file can be reached and an output files can be saved. 
+Here we mount the current working directory (using $pwd) and use this as the output directory, 
+the input file should be reachable from this directory as well. The path to the infile and outfile
+directories should be relative to the monuted current working directory.
+
+
+`-i INPUTFILE	input file (fasta or fastq) relative to pwd, up to 2 files`
+
+`-o OUTDIR	output directory relative to pwd`
+
+`-d DATABASE    set a specific database`
+
+`-p DATABASE_PATH    set path to database, default is /database`
+
+`-mp METHOD_PATH    set path to method (blast or kma)`
+
+`-l MIN_COV    set threshold for minimum coverage`
+
+`-t THRESHOLD set threshold for mininum blast identity`
+
+`-tmp    temporary directory for storage of the results from the external software`
+
+`-x    extended output`
+
 ## Web-server
 
 A webserver implementing the methods is available at the [CGE website](http://www.genomicepidemiology.org/) and can be found here:
 https://cge.cbs.dtu.dk/services/VirulenceFinder/
-
-
-## The Latest Version
-
-
-The latest version can be found at
-https://bitbucket.org/genomicepidemiology/virulencefinder/overview
-
-## Documentation
-
-
-The documentation available as of the date of this release can be found at
-https://bitbucket.org/genomicepidemiology/virulencefinder/overview.
-
 
 Citation
 =======
