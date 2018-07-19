@@ -7,7 +7,7 @@ import collections
 import json, gzip, pprint
 from cgecore.blaster.blaster import Blaster
 from cgecore.cgefinder import CGEFinder
-from distutils.spawn import find_executable
+from shutil
 
 ##########################################################################
 # FUNCTIONS
@@ -150,7 +150,6 @@ if args.quiet:
 # Defining varibales
 min_cov = float(args.min_cov)
 threshold = float(args.threshold)
-method_path = args.method_path
 
 # Check if valid database is provided
 if args.db_path is None:
@@ -188,6 +187,13 @@ if args.tmp_dir:
       tmp_dir = os.path.abspath(args.tmp_dir)
 else:
    tmp_dir = outdir
+
+# Check if valid path to BLAST is provided
+if not shutit.which(args.method_path):
+   sys.exit("Input Error: Method path could not be found!\n")
+else:
+   method_path = args.method_path
+
 
 db_description = {}
 # Check if databases and config file are correct/correponds
@@ -264,7 +270,7 @@ if file_format == "fastq":
                 if data from more runs is avaliable for the same\
                 sample, please concatinate the reads into two files")
     
-   sample_name = infile_1
+   sample_name = os.path.basename(infile_1)
    method = "kma"
 
    # Call KMA
@@ -304,7 +310,7 @@ for line in notes_file:
    func_notes[gene] = func
 
 hits = []
-table_file_lst = []
+
 for db in results:
    contig_res = {}
    if db == 'excluded':
@@ -315,7 +321,7 @@ for db in results:
    if db not in json_results[db_name]: 
       json_results[db_name][db] = {}
    if results[db] == "No hit found":
-      table_file_lst.append("%s\nNo hits found\n\n"%db_name)
+      json_results[db_name][db] = "No hit found"
    else:
       for contig_id, hit in results[db].items():
 
@@ -371,17 +377,18 @@ for db in results:
       for hit in hits:
          header = hit["sbjct_header"]
 
-         tmp = header.split("_")
+         tmp = header.split(":")
          gene = tmp[0]
          note = tmp[1]
          acc = tmp[2]
          identity = hit["perc_ident"]
          coverage = hit["perc_coverage"]
-         sbjt_length = hit["sbjct_length"]
+         sbj_length = hit["sbjct_length"]
          HSP = hit["HSP_length"]
          positions_contig = "%s..%s"%(hit["query_start"], hit["query_end"])
          positions_ref = "%s..%s"%(hit["sbjct_start"], hit["sbjct_end"])
          contig_name = hit["contig_name"]
+
 
          # Get protein function from notes_file
          if gene + note in func_notes:
@@ -393,8 +400,8 @@ for db in results:
 
          # Write JSON results dict
          json_results[db_name][db].update({header:{}})
-         json_results[db_name][db][header] = {"virulence_gene":gene,"identity":round(identity,2),"align_length":HSP,
-                                              "template_length":sbjt_length,"position_in_ref":positions_ref,
+         json_results[db_name][db][header] = {"virulence_gene":gene,"identity":round(identity,2),"HSP_length":HSP,
+                                              "template_length":sbj_length,"position_in_ref":positions_ref,
                                               "contig_name":contig_name,"positions_in_contig":positions_contig,
                                               "note":note,"accession":acc,"protein_function":function, "coverage":coverage,
                                               "hit_id":contig_id}
@@ -414,6 +421,7 @@ data[service]["user_input"] = userinput
 data[service]["run_info"] = run_info
 data[service]["results"] = json_results
 
+pprint.pprint(data)
 
 # Save json output
 result_file = "{}/data.json".format(outdir) 
@@ -421,7 +429,7 @@ with open(result_file, "w") as outfile:
    json.dump(data, outfile)
 
 # Getting and writing out the results
-header = ["Virulence_gene", "Identity", "Coverage", "Position in reference", "Contig", "Position in contig", "Protein function", "Accession no."]
+header = ["Virulence factor", "Identity", "Template / HSP length", "Contig", "Position in contig", "Protein function", "Accession number"]
 
 if args.extented_output:
    # Define extented output 
@@ -441,21 +449,24 @@ if args.extented_output:
    rows = [["Database"] + header]
    for species, dbs_info in json_results.items():
       for db_name, db_hits in dbs_info.items():
+         result_file.write(("*"*len(db_description[db_name])).ljust(5, "*") + "\n")
          result_file.write(db_description[db_name] + "\n")
          db_rows = []
          for gene_id, gene_info in sorted(db_hits.items(), key=lambda  x: (x[1]['virulence_gene'], x[1]['accession'])):
             vir_gene = gene_info["virulence_gene"]
             identity = str(gene_info["identity"])
             coverage = str(gene_info["coverage"])
+            template_HSP = str(gene_info["template_length"])+ " / " + str(gene_info["HSP_length"])
 
             position_in_ref = gene_info["position_in_ref"]
             position_in_contig = gene_info["positions_in_contig"]
             protein_function = gene_info["protein_function"]
             acc = gene_info["accession"]
             contig_name = gene_info["contig_name"]
+         
 
-            db_rows.append([vir_gene, identity, coverage, position_in_ref, contig_name, position_in_contig, protein_function, acc])
-            rows.append([db_name, vir_gene, identity, coverage, position_in_ref, contig_name, position_in_contig, protein_function, acc])
+            db_rows.append([vir_gene, identity, template_HSP, contig_name, position_in_contig, protein_function, acc])
+            rows.append([db_name, vir_gene, identity, template_HSP, contig_name, position_in_contig, protein_function, acc])
 
             # Write query fasta output
             hit_name = gene_info["hit_id"]
