@@ -7,7 +7,6 @@ import collections
 import json, gzip, pprint
 from cgecore.blaster.blaster import Blaster
 from cgecore.cgefinder import CGEFinder
-from shutil
 
 ##########################################################################
 # FUNCTIONS
@@ -144,7 +143,7 @@ args = parser.parse_args()
 ##########################################################################
 
 if args.quiet:
-   f = open('nul', 'w')
+   f = open('/dev/null', 'w')
    sys.stdout = f
 
 # Defining varibales
@@ -189,7 +188,7 @@ else:
    tmp_dir = outdir
 
 # Check if valid path to BLAST is provided
-if not shutit.which(args.method_path):
+if not shutil.which(args.method_path):
    sys.exit("Input Error: Method path could not be found!\n")
 else:
    method_path = args.method_path
@@ -400,11 +399,11 @@ for db in results:
 
          # Write JSON results dict
          json_results[db_name][db].update({header:{}})
-         json_results[db_name][db][header] = {"virulence_gene":gene,"identity":round(identity,2),"HSP_length":HSP,
+         json_results[db_name][db][header] = {"virulence_gene":gene,"identity":round(identity, 2),"HSP_length":HSP,
                                               "template_length":sbj_length,"position_in_ref":positions_ref,
                                               "contig_name":contig_name,"positions_in_contig":positions_contig,
-                                              "note":note,"accession":acc,"protein_function":function, "coverage":coverage,
-                                              "hit_id":contig_id}
+                                              "note":note,"accession":acc,"protein_function":function, 
+                                              "coverage":round(coverage, 2), "hit_id":contig_id}
 
 # Get run info for JSON file
 service = os.path.basename(__file__).replace(".py", "")
