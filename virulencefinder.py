@@ -169,6 +169,7 @@ elif not os.path.exists(args.infile[0]):
 elif len(args.infile) > 1:
    if not os.path.exists(args.infile[1]):
       sys.exit("Input Error: Input file does not exist!\n")
+   infile = args.infile
 else:   
    infile = args.infile
 
@@ -374,6 +375,10 @@ for db in results:
          gene = tmp[0]
          note = tmp[1]
          acc = tmp[2]
+         try: 
+            variant = tmp[3]
+         except IndexError:
+            variant = ""
          identity = hit["perc_ident"]
          coverage = hit["perc_coverage"]
          sbj_length = hit["sbjct_length"]
@@ -385,6 +390,8 @@ for db in results:
          # Get protein function from notes_file
          if gene + note in func_notes:
             function = func_notes[gene + note].rstrip()
+         elif gene + variant in func_notes:
+            function = func_notes[gene + variant].rstrip()
          elif gene in func_notes:
             function = func_notes[gene].rstrip()
          else:
