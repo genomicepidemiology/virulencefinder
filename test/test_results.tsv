@@ -1,4 +1,4 @@
 Database	Virulence factor	Identity	Query / Template length	Contig	Position in contig	Protein function	Accession number
 virulence_ecoli	astA	100.0	117 / 117	astA:1:AF161000	1..117	 EAST-1 heat-stable toxin	AF161000
-virulence_ecoli	stx1A	99.79	948 / 948	stx1:1:M24352:1	1..948	 Shiga toxin 1, subunit A	EF079675
-virulence_ecoli	stx1B	100.0	270 / 270	stx1:1:M24352:1	958..1227	 Shiga toxin 1, subunit B	AM230663
+virulence_ecoli	stx1A	99.79	948 / 948	stx1:1:M24352:1	1..948	  Shiga toxin 1, subunit A, variant a	EF079675
+virulence_ecoli	stx1B	100.0	270 / 270	stx1:1:M24352:1	958..1227	  Shiga toxin 1, subunit B, variant a	AM230663
