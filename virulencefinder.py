@@ -372,12 +372,19 @@ for db in results:
          header = hit["sbjct_header"]
 
          tmp = header.split(":")
-         gene = tmp[0]
-         note = tmp[1]
-         acc = tmp[2]
+         try:
+            gene = tmp[0]
+            note = tmp[1]
+            acc = tmp[2]
+         except:
+            gene = ":".join(tmp)
+            print(gene)
+            note = ""
+            acc = ""
          try: 
             variant = tmp[3]
          except IndexError:
+          
             variant = ""
          identity = hit["perc_ident"]
          coverage = hit["perc_coverage"]
