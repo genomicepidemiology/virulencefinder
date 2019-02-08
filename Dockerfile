@@ -13,24 +13,24 @@ RUN apt-get update -qq; \
     libz-dev \
     ; \
     rm -rf /var/cache/apt/* /var/lib/apt/lists/*;
-    
+
 ENV DEBIAN_FRONTEND Teletype
 
 # Install python dependencies
-RUN pip3 install -U biopython tabulate cgecore==1.3.2;
+RUN pip3 install -U biopython tabulate cgecore==1.4.2;
 
-# Install kma 
+# Install kma
 RUN git clone --branch 1.0.1 --depth 1 https://bitbucket.org/genomicepidemiology/kma.git; \
     cd kma && make; \
     mv kma* /bin/
 
-COPY virulencefinder.py /usr/src/virulencefinder.py 
+COPY virulencefinder.py /usr/src/virulencefinder.py
 
 # TEST setup
 RUN mkdir /database /test
-COPY test/database/ /database/ 
+COPY test/database/ /database/
 COPY test/test* test/
-COPY virulencefinder.py /usr/src/virulencefinder.py 
+COPY virulencefinder.py /usr/src/virulencefinder.py
 
 RUN chmod 755 /usr/src/virulencefinder.py; \
     chmod 755 test/test.sh
