@@ -117,9 +117,9 @@ def make_aln(file_handle, json_data, query_aligns, homol_aligns, sbjct_aligns):
                     key=lambda x: (x[1]['virulence_gene'],
                                    x[1]['accession'])):
 
-                seq_name = ("{gene:s}_{acc:s}"
-                            .format(gene_info["virulence_gene"],
-                                    gene_info["accession"]))
+                seq_name = ("{gene}_{acc}"
+                            .format(gene=gene_info["virulence_gene"],
+                                    acc=gene_info["accession"]))
                 hit_name = gene_info["hit_id"]
 
                 seqs = ["", "", ""]
@@ -539,7 +539,7 @@ if args.extented_output:
                 coverage = str(gene_info["coverage"])
 
                 template_HSP = (
-                    "{hsp_len:s} / {template_len:s}".
+                    "{hsp_len} / {template_len}".
                     format(hsp_len=gene_info["HSP_length"],
                            template_len=gene_info["template_length"]))
 
