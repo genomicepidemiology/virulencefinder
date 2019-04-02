@@ -93,7 +93,9 @@ directories should be relative to the monuted current working directory.
 
 `-tmp    temporary directory for storage of the results from the external software`
 
-`-x    extended output`
+`-x    extended output: Give extented output with allignment files, template and query hits in fasta and a tab seperated file with gene profile results`
+
+`-q    don't show results `
 
 ## Web-server
 
