@@ -22,6 +22,7 @@ isolates of bacteria - at the moment only E. coli, Enterococcus, S. aureus and L
 ## Installation
 
 Setting up VirulenceFinder program
+Warning: Due to bugs in BioPython 1.74, if you are not using the Docker container, do not use that version if not using Python 3.7.
 ```bash
 # Go to wanted location for virulencefinder
 cd /path/to/some/dir
