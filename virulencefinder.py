@@ -456,8 +456,8 @@ for db in results:
                 function = ""
 
             # Write JSON results dict
-            json_results[db_name][db].update({contig_id: {}})
-            json_results[db_name][db][contig_id] = {
+            json_results[db_name][db].update({header: {}})
+            json_results[db_name][db][header] = {
                 "virulence_gene": gene,
                 "identity": round(identity, 2),
                 "HSP_length": HSP,
@@ -469,8 +469,7 @@ for db in results:
                 "accession": acc,
                 "protein_function": function,
                 "coverage": round(coverage, 2),
-                "hit_id": contig_id,
-                "gene_header": header}
+                "hit_id": contig_id}
 
 # Get run info for JSON file
 service = os.path.basename(__file__).replace(".py", "")
