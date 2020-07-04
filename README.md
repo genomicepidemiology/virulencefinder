@@ -76,7 +76,7 @@ https://bitbucket.org/genomicepidemiology/kma
 
 ```url
 ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
-``
+```
 
 ## Usage
 
