@@ -1,0 +1,32 @@
+package:
+  name: virulencefinder
+  version: 2.0.4
+
+source:
+  url: https://bitbucket.org/genomicepidemiology/VirulenceFinder/get/2.0.4.tar.gz
+
+build:
+  number: 0
+  noarch: generic
+
+requirements:
+  host:
+    - python>=3.5
+    - kma
+    - wget
+  run:
+    - python>=3.5
+    - kma
+    - biopython
+    - tabulate
+    - cgecore
+    - blast
+
+test:
+  commands:
+    - virulencefinder.py -h | grep virulencefinder.py >/dev/null
+
+about:
+  home: https://bitbucket.org/genomicepidemiology/virulencefinder
+  summary: 'VirulenceFinder service contains one python script virulencefinder.py which is the script of the latest version of the VirulenceFinder service. VirulenceFinder identifies viruelnce genes in total or partial sequenced isolates of bacteria - at the moment only E. coli, Enterococcus, S. aureus and Listeria are available.'
+  license: Apache-2.0
